@@ -1,0 +1,64 @@
+# https://cbonte.github.io/haproxy-dconv/configuration-1.6.html
+global
+    #log /dev/log    local0
+    #log /dev/log    local1 notice
+    #chroot /var/lib/haproxy
+    #stats socket /run/haproxy/admin.sock mode 660 level admin
+    #stats timeout 30s
+    #user haproxy
+    #group haproxy
+    daemon
+    maxconn 256
+
+    # Default SSL material locations
+    #ca-base /etc/ssl/certs
+    #crt-base /etc/ssl/private
+
+    # Default ciphers to use on SSL-enabled listening sockets.
+    # For more information, see ciphers(1SSL).
+    #ssl-default-bind-ciphers kEECDH+aRSA+AES:kRSA+AES:+AES256:RC4-SHA:!kEDH:!LOW:!EXP:!MD5:!aNULL:!eNULL
+
+defaults
+    log     global
+    mode    http
+    option  httplog
+    option  dontlognull
+    timeout connect 5000ms
+    timeout client 50000ms
+    timeout server 50000ms
+    #errorfile 400 /etc/haproxy/errors/400.http
+    #errorfile 403 /etc/haproxy/errors/403.http
+    #errorfile 408 /etc/haproxy/errors/408.http
+    #errorfile 500 /etc/haproxy/errors/500.http
+    #errorfile 502 /etc/haproxy/errors/502.http
+    #errorfile 503 /etc/haproxy/errors/503.http
+    #errorfile 504 /etc/haproxy/errors/504.http
+
+frontend http-in
+    #bind *:443 ssl crt /etc/ssl/private/server.pem
+    bind *:80
+    mode http
+    default_backend servers
+
+backend servers
+    mode http
+    balance roundrobin
+    #option forwardfor
+    #http-request set-header X-Forwarded-Port %[dst_port]
+    #http-request add-header X-Forwarded-Proto https if { ssl_fc }
+    #option httpchk HEAD / HTTP/1.1\r\nHost:localhost
+    #cookie SRV_ID insert indirect nocache
+    #server  inst1 192.168.110.56:443 check inter 2000 fall 3
+    #server web01 0.0.0.0:8080 check cookie web01
+    #server web02 0.0.0.0:8081 check cookie web02
+    #server web03 0.0.0.0:8082 check cookie web03
+    #server web04 0.0.0.0:8083 check cookie web04
+
+    server server1 192.168.110.56:3001 maxconn 32
+    server server2 192.168.110.56:3002 maxconn 32
+
+#listen stats *:1936
+    #stats enable
+    #stats uri /stats
+    #stats hide-version
+    #stats auth costiamperf01:!vmLab123
